@@ -1,0 +1,57 @@
+// From _import.html
+{@ // PHP Variables }
+<include cond="!$theme" target="darkmodeconf.php" />
+
+{@ 
+  $li = $layout_info;
+
+  // 컬러모드 구분을 위한 쿠키 체크
+  if(!$layout_info->color_scheme && $_COOKIE['is_dark_theme'])
+    $color_scheme = $_COOKIE['is_dark_theme'];
+
+  // 컬러 모드
+  if($color_scheme !== "light")
+    $is_darkmode = $color_scheme;
+
+  // theme 선언
+  $theme = new theme();
+  $theme->variables = $theme->getVariables($is_darkmode);
+
+  // 컬러 모드를 변수로 전달
+  $theme->variables['dark-mode'] = $is_darkmode;
+
+  // 레이아웃 설정을 변수로 전달
+  if($layout_info->primary_color)
+    $theme->variables['color-primary'] = $layout_info->primary_color;
+}
+
+
+// From _config.html
+{@ // 브라우저 테마 컬러 지정 }
+{Context::addMetaTag("theme-color", $theme->variables['color-primary'])}
+
+{@ // 다크 모드 전환 코드 }
+<script>
+  function onClickDarkThemeToggle() {
+    const isDarkTheme = $.cookie('is_dark_theme');
+    
+    if(isDarkTheme === 'true') $.cookie('is_dark_theme', '', { path: '/' });
+    else $.cookie('is_dark_theme', true, { path: '/' });
+
+    window.location.reload()
+  }
+</script>
+
+
+// From layout.html (header-right.html)
+{@
+    $heaer_darkmode_text = "다크 모드로 전환";
+  
+    if($is_darkmode)
+      $heaer_darkmode_text = "라이트 모드로 전환";
+  }
+  
+  <a cond="!$layout_info->color_scheme" class="app-header-item app-tooltip" onclick="onClickDarkThemeToggle()" title="{$heaer_darkmode_text}">
+    <ion-icon cond="$is_darkmode" name="sunny-outline"></ion-icon>
+    <ion-icon cond="!$is_darkmode" name="contrast-outline"></ion-icon>
+  </a>
